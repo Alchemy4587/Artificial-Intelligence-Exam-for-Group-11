@@ -1,0 +1,85 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fashion MNIST Classifier</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">Fashion Item Classifier</h1>
+        
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+            <form id="upload-form" class="space-y-4">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="image-input" class="hidden" accept=".jpg,.jpeg,.png">
+                    <label for="image-input" class="cursor-pointer text-blue-500 hover:text-blue-600">
+                        Choose an image
+                    </label>
+                    <div id="preview" class="mt-4"></div>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                    Classify Image
+                </button>
+            </form>
+
+            <div id="result" class="mt-6 hidden">
+                <h2 class="text-xl font-semibold mb-2">Results:</h2>
+                <div class="bg-gray-50 rounded p-4">
+                    <p>Category: <span id="category" class="font-medium"></span></p>
+                    <p>Confidence: <span id="confidence" class="font-medium"></span>%</p>
+                </div>
+            </div>
+
+            <div id="error" class="mt-6 hidden text-red-500"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('image-input').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/classify', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('error').textContent = data.error;
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('result').classList.add('hidden');
+                } else {
+                    document.getElementById('category').textContent = data.category;
+                    document.getElementById('confidence').textContent = data.confidence.toFixed(1);
+                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('error').classList.add('hidden');
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = 'An error occurred during classification';
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('result').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('image-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = `<img src="${e.target.result}" class="max-w-full h-auto mx-auto">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
