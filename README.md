@@ -48,6 +48,7 @@ pip install -r requirements.txt
   2. Run dataLoading.py
   2. Run model.py 
   3. Run flask_api.py
+NB: Please create a folder called models because I place it in my gitignore file
 ```
 
 ### **3️⃣ Train the Model (Because I did not push the trained model)**  
